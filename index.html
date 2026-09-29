@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>わりざんの ひっさん</title>
+<meta name="description" content="わりざんの ひっさんを、たてる・かける・ひく・おろす の じゅんばんに れんしゅうする アプリ">
+<meta name="theme-color" content="#fdf8ef">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="わりざん">
+<link rel="manifest" href="./manifest.webmanifest">
+<link rel="apple-touch-icon" href="./icons/apple-touch-icon.png">
+<link rel="icon" href="./icons/icon-192.png">
+<link rel="stylesheet" href="./css/style.css">
+</head>
+<body data-screen="home">
+
+<!-- ホーム -->
+<section class="screen screen--home" id="screen-home">
+  <h1 class="title">わりざんの ひっさん</h1>
+  <p class="subtitle">たてる → かける → ひく → おろす</p>
+
+  <div class="levels" id="level-list">
+    <button type="button" class="level" data-level="1">
+      <span class="level__no">レベル 1</span>
+      <span class="level__name">わりきれる わりざん</span>
+      <span class="level__detail">2〜3けた ÷ 1けた</span>
+      <span class="level__badge" data-badge="1"></span>
+    </button>
+    <button type="button" class="level" data-level="2">
+      <span class="level__no">レベル 2</span>
+      <span class="level__name">あまりの ある わりざん</span>
+      <span class="level__detail">2〜3けた ÷ 1けた</span>
+      <span class="level__badge" data-badge="2"></span>
+    </button>
+    <button type="button" class="level" data-level="3">
+      <span class="level__no">レベル 3</span>
+      <span class="level__name">2けたで わる わりざん</span>
+      <span class="level__detail">3けた ÷ 2けた</span>
+      <span class="level__badge" data-badge="3"></span>
+    </button>
+  </div>
+
+  <button type="button" class="button button--ghost" data-go="record">きろくを みる</button>
+  <p class="note" id="storage-warning" hidden>
+    この ブラウザでは きろくを のこせないよ。ホームがめんに ついかして つかってね
+  </p>
+</section>
+
+<!-- れんしゅう -->
+<section class="screen screen--drill" id="screen-drill">
+  <header class="bar">
+    <button type="button" class="bar__quit" id="quit">やめる</button>
+    <span class="bar__level" id="level-name"></span>
+    <span class="bar__progress" id="progress"></span>
+  </header>
+  <div class="dots" id="dots"></div>
+
+  <div class="stage" id="stage">
+    <div class="grid" id="grid"></div>
+  </div>
+
+  <p class="expr" id="expr"></p>
+
+  <div class="message-row">
+    <p class="message" id="message" role="status" aria-live="polite" data-tone="info"></p>
+    <button type="button" class="hint" id="hint">ヒント</button>
+  </div>
+
+  <div class="pad-area" id="pad-area" data-mode="input">
+    <div class="keypad" id="keypad"></div>
+    <button type="button" class="button button--next" id="next">つぎの もんだい</button>
+  </div>
+</section>
+
+<!-- けっか -->
+<section class="screen screen--page" id="screen-result">
+  <div id="result-body"></div>
+  <div class="actions">
+    <button type="button" class="button" id="again">もう いっかい</button>
+    <button type="button" class="button button--ghost" data-go="home">ホームへ</button>
+  </div>
+</section>
+
+<!-- きろく -->
+<section class="screen screen--page" id="screen-record">
+  <h2 class="title">きろく</h2>
+  <div id="record-body"></div>
+  <div class="actions">
+    <button type="button" class="button button--ghost" data-go="home">ホームへ</button>
+    <button type="button" class="button button--danger" id="reset">データを はじめから</button>
+    <div class="confirm" id="reset-confirm" hidden>
+      <p class="note">ぜんぶの きろくを けすよ。いいかな？</p>
+      <button type="button" class="button button--danger" id="reset-yes">けす</button>
+      <button type="button" class="button button--ghost" id="reset-no">やめる</button>
+    </div>
+  </div>
+</section>
+
+<script type="module" src="./src/app.js"></script>
+</body>
+</html>

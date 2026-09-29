@@ -1,0 +1,544 @@
+/* わりざんの ひっ算 — iPhone 12 mini (375 × 812) をきほんに、タブレットの たて・よこにも あわせる */
+
+:root {
+  --bg: #fdf8ef;
+  --paper: #ffffff;
+  --ink: #33302c;
+  --sub: #7a7268;
+  --line: #d9d0c1;
+  --accent: #2f7d32;
+  --accent-soft: #e3f1e4;
+  --active: #ffe37a;
+  --target: #f0b429;
+  --ng: #d1442f;
+  --ng-soft: #fdeae7;
+  --think: #c86a12;
+  --shown: #1f6fb2;
+  --key: clamp(46px, 8.4vh, 64px);
+  color-scheme: light;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Hiragino Kaku Gothic ProN",
+    "Noto Sans JP", "Yu Gothic", sans-serif;
+  font-size: 16px;
+  line-height: 1.5;
+  overflow: hidden;
+  overscroll-behavior: none;
+  touch-action: manipulation;
+  -webkit-text-size-adjust: 100%;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.screen {
+  display: none;
+  height: 100%;
+  padding:
+    calc(env(safe-area-inset-top) + 8px)
+    calc(env(safe-area-inset-right) + 14px)
+    calc(env(safe-area-inset-bottom) + 10px)
+    calc(env(safe-area-inset-left) + 14px);
+}
+
+body[data-screen="home"] .screen--home,
+body[data-screen="result"] #screen-result,
+body[data-screen="record"] #screen-record {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  overflow-y: auto;
+}
+
+body[data-screen="drill"] .screen--drill { display: grid; }
+
+/* ---- 共通のぶひん ---- */
+
+.title {
+  margin: 4px 0 0;
+  font-size: 26px;
+  letter-spacing: 0.02em;
+}
+
+.subtitle {
+  margin: 0;
+  color: var(--sub);
+  font-size: 15px;
+}
+
+.section {
+  margin: 12px 0 4px;
+  font-size: 17px;
+}
+
+.note {
+  margin: 4px 0;
+  color: var(--sub);
+  font-size: 13px;
+}
+
+.advice {
+  margin: 8px 0 0;
+  padding: 10px 12px;
+  background: var(--accent-soft);
+  border-radius: 10px;
+  font-size: 15px;
+}
+
+.button {
+  min-height: 52px;
+  padding: 10px 18px;
+  border: none;
+  border-radius: 14px;
+  background: var(--accent);
+  color: #fff;
+  font-size: 18px;
+  font-family: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.button:active { transform: translateY(1px); }
+
+.button--ghost {
+  background: var(--paper);
+  color: var(--ink);
+  border: 2px solid var(--line);
+}
+
+.button--danger {
+  background: var(--paper);
+  color: var(--ng);
+  border: 2px solid var(--ng);
+}
+
+.actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: auto;
+  padding-top: 12px;
+}
+
+.confirm {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px;
+  border: 2px dashed var(--ng);
+  border-radius: 12px;
+}
+
+/* ---- ホーム ---- */
+
+.levels {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin: 8px 0;
+}
+
+.level {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 2px 10px;
+  min-height: 84px;
+  padding: 12px 16px;
+  border: 2px solid var(--line);
+  border-radius: 16px;
+  background: var(--paper);
+  color: inherit;
+  font-family: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.level:active { background: var(--accent-soft); }
+
+.level__no {
+  grid-column: 1;
+  color: var(--accent);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.level__name {
+  grid-column: 1;
+  font-size: 19px;
+  font-weight: 700;
+}
+
+.level__detail {
+  grid-column: 1;
+  color: var(--sub);
+  font-size: 13px;
+}
+
+.level__badge {
+  grid-column: 2;
+  grid-row: 1 / span 3;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: var(--bg);
+  color: var(--sub);
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+/* ---- れんしゅう画面のわりつけ ---- */
+
+.screen--drill {
+  grid-template-rows: auto auto minmax(0, 1fr) auto auto auto;
+  grid-template-areas: "bar" "dots" "stage" "expr" "msg" "pad";
+  gap: 6px;
+}
+
+.bar { grid-area: bar; }
+.dots { grid-area: dots; }
+.stage { grid-area: stage; }
+.expr { grid-area: expr; }
+.message-row { grid-area: msg; }
+.pad-area { grid-area: pad; }
+
+.bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.bar__quit {
+  padding: 6px 12px;
+  border: 2px solid var(--line);
+  border-radius: 999px;
+  background: var(--paper);
+  color: var(--sub);
+  font-family: inherit;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.bar__level {
+  flex: 1;
+  font-size: 13px;
+  color: var(--sub);
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.bar__progress {
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.dots {
+  display: flex;
+  gap: 5px;
+}
+
+.dot {
+  width: 100%;
+  height: 6px;
+  border-radius: 3px;
+  background: var(--line);
+}
+
+.dot--done { background: var(--target); }
+.dot--ok { background: var(--accent); }
+.dot--now { background: var(--ink); }
+
+.expr {
+  margin: 0;
+  color: var(--sub);
+  font-size: 14px;
+  text-align: center;
+}
+
+/* ---- ひっ算のマス ---- */
+
+.stage {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  overflow-y: auto;
+  touch-action: pan-y;
+}
+
+.grid {
+  --cell: 44px;
+  flex: none;
+}
+
+.row {
+  display: flex;
+}
+
+.cell {
+  display: grid;
+  place-items: center;
+  width: var(--cell);
+  height: var(--cell);
+  font-size: calc(var(--cell) * 0.62);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  border-radius: 8px;
+}
+
+.cell--left {
+  font-weight: 700;
+}
+
+/* ひっ算のかっこ: わられる数の上に よこ線、わる数の右に たて線 */
+.row--dividend .cell--used { border-top: 3px solid var(--ink); }
+.row--dividend .cell--left { border-right: 3px solid var(--ink); }
+
+/* ひきざんの よこ線 */
+.cell--rule { border-top: 3px solid var(--ink); }
+
+.is-target {
+  background: var(--paper);
+  box-shadow: inset 0 0 0 2px var(--line);
+}
+
+.is-active {
+  background: var(--active);
+  box-shadow: inset 0 0 0 3px var(--target);
+  animation: pulse 1.6s ease-in-out infinite;
+}
+
+.is-wrong {
+  background: var(--ng-soft);
+  box-shadow: inset 0 0 0 3px var(--ng);
+}
+
+.is-shown { color: var(--shown); }
+
+@keyframes pulse {
+  0%, 100% { box-shadow: inset 0 0 0 3px var(--target); }
+  50% { box-shadow: inset 0 0 0 5px var(--target); }
+}
+
+/* まちがえている間は 赤のままにする */
+.is-active.is-wrong { animation: none; }
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-4px); }
+  75% { transform: translateX(4px); }
+}
+
+.shake { animation: shake 0.28s ease-in-out 2; }
+
+@media (prefers-reduced-motion: reduce) {
+  .is-active, .shake { animation: none; }
+}
+
+/* ---- メッセージと キーパッド ---- */
+
+.message-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 46px;
+}
+
+.message {
+  flex: 1;
+  margin: 0;
+  padding: 7px 10px;
+  border-radius: 10px;
+  background: var(--paper);
+  border: 2px solid var(--line);
+  font-size: 14px;
+  line-height: 1.35;
+}
+
+.message[data-tone="ng"] { background: var(--ng-soft); border-color: var(--ng); color: var(--ng); }
+.message[data-tone="think"] { background: #fdf1e2; border-color: var(--think); color: var(--think); }
+.message[data-tone="shown"] { background: #e8f1fa; border-color: var(--shown); color: var(--shown); }
+.message[data-tone="ok"] { background: var(--accent-soft); border-color: var(--accent); color: var(--accent); }
+.message[data-tone="hint"] { background: #fffbe8; border-color: var(--target); }
+
+.hint {
+  flex: none;
+  min-width: 68px;
+  min-height: 46px;
+  border: 2px solid var(--target);
+  border-radius: 12px;
+  background: #fffbe8;
+  color: var(--ink);
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.pad-area {
+  min-height: calc(var(--key) * 2 + 8px);
+}
+
+.keypad {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 8px;
+}
+
+.key {
+  height: var(--key);
+  border: 2px solid var(--line);
+  border-radius: 12px;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: inherit;
+  font-size: 26px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+}
+
+.key:active { background: var(--active); }
+.key:disabled { opacity: 0.4; }
+
+.button--next {
+  width: 100%;
+  height: 100%;
+  min-height: calc(var(--key) * 2 + 8px);
+  font-size: 20px;
+}
+
+.pad-area[data-mode="input"] .button--next { display: none; }
+.pad-area[data-mode="next"] .keypad { display: none; }
+
+/* ---- けっか・きろく ---- */
+
+.scores {
+  display: flex;
+  gap: 10px;
+}
+
+.score {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 12px 8px;
+  border: 2px solid var(--line);
+  border-radius: 14px;
+  background: var(--paper);
+}
+
+.score__value {
+  font-size: 30px;
+  font-weight: 700;
+  color: var(--accent);
+}
+
+.score__label {
+  color: var(--sub);
+  font-size: 12px;
+  text-align: center;
+}
+
+.card {
+  padding: 12px 14px;
+  border: 2px solid var(--line);
+  border-radius: 14px;
+  background: var(--paper);
+}
+
+.card__title {
+  margin: 0 0 6px;
+  font-size: 16px;
+}
+
+.card__stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 14px;
+  margin-bottom: 8px;
+  font-size: 14px;
+}
+
+.bars {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.bar {
+  display: grid;
+  grid-template-columns: 4.5em 1fr 3.5em;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+}
+
+.bar__track {
+  height: 12px;
+  border-radius: 6px;
+  background: var(--bg);
+  overflow: hidden;
+}
+
+.bar__fill {
+  display: block;
+  height: 100%;
+  min-width: 2px;
+  border-radius: 6px;
+  background: var(--target);
+}
+
+.bar__fill--worst { background: var(--ng); }
+
+.bar__count {
+  color: var(--sub);
+  text-align: right;
+}
+
+/* ---- よこむき（タブレット・iPhone を よこにしたとき） ---- */
+
+@media (orientation: landscape) and (max-height: 600px) {
+  .screen--drill {
+    grid-template-columns: minmax(0, 1fr) minmax(280px, 46%);
+    grid-template-rows: auto auto minmax(0, 1fr) auto;
+    grid-template-areas:
+      "bar   bar"
+      "dots  msg"
+      "stage pad"
+      "expr  pad";
+    column-gap: 12px;
+  }
+
+  .pad-area {
+    display: flex;
+    align-items: center;
+  }
+
+  .keypad { width: 100%; }
+  .key { height: clamp(42px, 13vh, 60px); }
+  .button--next { min-height: clamp(84px, 26vh, 120px); }
+}
+
+/* ---- おおきい画面（タブレット） ---- */
+
+@media (min-width: 700px) {
+  :root { --key: clamp(56px, 7.5vh, 76px); }
+  .screen { max-width: 760px; margin: 0 auto; }
+  .title { font-size: 32px; }
+  .message { font-size: 17px; }
+  .level__name { font-size: 22px; }
+  .key { font-size: 30px; }
+}

@@ -1,0 +1,11 @@
+{
+  "name": "warizan",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "小学4年生向け わりざんの ひっ算 れんしゅう PWA",
+  "scripts": {
+    "test": "node --test",
+    "start": "python -m http.server 8080"
+  }
+}
