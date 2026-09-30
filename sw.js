@@ -1,7 +1,7 @@
 // オフラインで使えるようにする。ファイルを足したら PRECACHE に足して、
 // CACHE_NAME のばんごうを上げること（上げないと古いファイルが残る）。
 
-const CACHE_NAME = 'warizan-v3';
+const CACHE_NAME = 'warizan-v5';
 
 const PRECACHE = [
   './',

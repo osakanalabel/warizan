@@ -25,6 +25,15 @@ function pick(id) {
   return document.getElementById(id);
 }
 
+/**
+ * 要素が なくても 落とさない。
+ * PWA では 古い index.html と 新しい app.js が 組み合わさることが あるので、
+ * ここで 落ちると アプリが まるごと 起動しなくなる。ボタンが 1つ 出ないほうが まし。
+ */
+function on(el, type, fn) {
+  if (el) el.addEventListener(type, fn);
+}
+
 function today() {
   const d = new Date();
   const p = (n) => String(n).padStart(2, '0');
@@ -175,6 +184,28 @@ function resetData() {
   hideResetConfirm();
 }
 
+// ---- 強制リロード -------------------------------------------------------
+
+/**
+ * キャッシュと Service Worker を すべて すてて 読み直す。
+ * ネットに つながっているときに つかう（つながっていないと 読み直せない）。
+ */
+async function doReload() {
+  try {
+    if ('caches' in window) {
+      const keys = await caches.keys();
+      await Promise.all(keys.map((key) => caches.delete(key)));
+    }
+    if ('serviceWorker' in navigator) {
+      const regs = await navigator.serviceWorker.getRegistrations();
+      await Promise.all(regs.map((reg) => reg.unregister()));
+    }
+  } catch {
+    // すてられなくても 読み直しは する
+  }
+  location.reload();
+}
+
 // ---- くみたて -----------------------------------------------------------
 
 function wire() {
@@ -204,6 +235,7 @@ function wire() {
   });
   dom.resetYes.addEventListener('click', resetData);
   dom.resetNo.addEventListener('click', hideResetConfirm);
+  on(dom.reload, 'click', doReload);
 
   window.addEventListener('resize', layout);
   window.addEventListener('orientationchange', () => setTimeout(layout, 200));
@@ -233,6 +265,7 @@ function boot() {
     resetYes: pick('reset-yes'),
     resetNo: pick('reset-no'),
     warning: pick('storage-warning'),
+    reload: pick('reload'),
   });
 
   state.stats = loadStats();

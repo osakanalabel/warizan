@@ -182,6 +182,7 @@ export function renderHomeBadges(container, stats) {
 
 /** ホーム画面に常時出す、いまの称号バッジ。 */
 export function renderHomeTitle(container, stats) {
+  if (!container) return; // 古い index.html を つかんだ ときの ほけん
   container.textContent = '';
   const { title } = statsSummary(stats);
   const badge = el('div', 'home-title');

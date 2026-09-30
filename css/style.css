@@ -20,6 +20,11 @@
 
 * { box-sizing: border-box; }
 
+/* hidden 属性を かならず 効かせる。
+   .confirm のように display を 指定した ルールが あると、
+   ブラウザ標準の [hidden] { display: none } に 勝ってしまうため。 */
+[hidden] { display: none !important; }
+
 html, body {
   height: 100%;
   margin: 0;
@@ -137,6 +142,23 @@ body[data-screen="drill"] .screen--drill { display: grid; }
   padding: 12px;
   border: 2px dashed var(--ng);
   border-radius: 12px;
+}
+
+/* リロード。赤いボタンとは はなして、小さく おく */
+.reload-box {
+  display: flex;
+  justify-content: center;
+  margin-top: 16px;
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
+}
+
+.button--small {
+  min-height: 36px;
+  padding: 6px 14px;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 400;
 }
 
 /* ---- ホーム ---- */
