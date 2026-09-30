@@ -1,7 +1,7 @@
 // オフラインで使えるようにする。ファイルを足したら PRECACHE に足して、
 // CACHE_NAME のばんごうを上げること（上げないと古いファイルが残る）。
 
-const CACHE_NAME = 'warizan-v1';
+const CACHE_NAME = 'warizan-v3';
 
 const PRECACHE = [
   './',
@@ -14,6 +14,7 @@ const PRECACHE = [
   './src/core/steps.js',
   './src/core/judge.js',
   './src/core/stats.js',
+  './src/core/titles.js',
   './src/core/rng.js',
   './src/ui/grid.js',
   './src/ui/keypad.js',

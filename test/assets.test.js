@@ -108,14 +108,16 @@ test('core は DOM や localStorage に さわらない', () => {
 });
 
 // 画面に出る文字は すべて ひらがな（数字は算用数字）。
+// ただし「九九」だけは 漢字のまま（算数の授業で見る表記に あわせる）。ほかに例外はない。
 // コメントは開発者向けなので、ここでは見ない。
-test('画面に出る文字に 漢字を つかっていない', () => {
+test('画面に出る文字に 漢字を つかっていない（九九 だけ 例外）', () => {
   const kanji = /[㐀-䶿一-鿿]/;
   const files = [...listFiles('src'), 'index.html', 'manifest.webmanifest'];
   for (const file of files) {
     const text = stripComments(read(file)).replace(/<!--[\s\S]*?-->/g, '');
     text.split(/\r?\n/).forEach((line, i) => {
-      assert.ok(!kanji.test(line), `${file}:${i + 1} に 漢字が ある: ${line.trim()}`);
+      const rest = line.replace(/九九/g, ''); // 例外は「九九」ひとつだけ
+      assert.ok(!kanji.test(rest), `${file}:${i + 1} に 漢字が ある: ${line.trim()}`);
     });
   }
 });

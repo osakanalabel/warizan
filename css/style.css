@@ -472,13 +472,13 @@ body[data-screen="drill"] .screen--drill { display: grid; }
   font-size: 14px;
 }
 
-.bars {
+.stat-bars {
   display: flex;
   flex-direction: column;
   gap: 5px;
 }
 
-.bar {
+.stat-bar {
   display: grid;
   grid-template-columns: 4.5em 1fr 3.5em;
   align-items: center;
@@ -486,14 +486,14 @@ body[data-screen="drill"] .screen--drill { display: grid; }
   font-size: 13px;
 }
 
-.bar__track {
+.stat-bar__track {
   height: 12px;
   border-radius: 6px;
   background: var(--bg);
   overflow: hidden;
 }
 
-.bar__fill {
+.stat-bar__fill {
   display: block;
   height: 100%;
   min-width: 2px;
@@ -501,11 +501,153 @@ body[data-screen="drill"] .screen--drill { display: grid; }
   background: var(--target);
 }
 
-.bar__fill--worst { background: var(--ng); }
+.stat-bar__fill--worst { background: var(--ng); }
 
-.bar__count {
+.stat-bar__count {
   color: var(--sub);
   text-align: right;
+}
+
+/* ---- しょうごう（XP・レベル） ---- */
+
+.home-title {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 10px 14px;
+  border: 2px solid var(--target);
+  border-radius: 14px;
+  background: #fffbe8;
+}
+
+.home-title__lv {
+  color: var(--think);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.home-title__name {
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.home-title__track {
+  height: 8px;
+  border-radius: 4px;
+  background: var(--bg);
+  overflow: hidden;
+}
+
+.home-title__fill {
+  display: block;
+  height: 100%;
+  min-width: 2px;
+  border-radius: 4px;
+  background: var(--target);
+}
+
+.title-progress {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 10px 0;
+  padding: 10px 14px;
+  border: 2px solid var(--target);
+  border-radius: 14px;
+  background: #fffbe8;
+}
+
+.title-progress__name {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.title-progress__track {
+  height: 10px;
+  border-radius: 5px;
+  background: var(--bg);
+  overflow: hidden;
+}
+
+.title-progress__fill {
+  display: block;
+  height: 100%;
+  min-width: 2px;
+  border-radius: 5px;
+  background: var(--target);
+}
+
+.xp-earned {
+  margin: 2px 0 0;
+  color: var(--think);
+  font-size: 18px;
+  font-weight: 700;
+  text-align: center;
+}
+
+.levelup-banner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 14px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #fff3c4, #ffe37a);
+  animation: levelup-pop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+.levelup-banner__label {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--think);
+}
+
+.levelup-banner__title {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 700;
+  text-align: center;
+}
+
+@keyframes levelup-pop {
+  0% { transform: scale(0.85); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+.title-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  max-height: 45vh;
+  overflow-y: auto;
+  margin-top: 8px;
+  border: 2px solid var(--line);
+  border-radius: 10px;
+}
+
+.title-row {
+  display: grid;
+  grid-template-columns: 3.5em 1fr auto;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 10px;
+  font-size: 13px;
+  border-bottom: 1px solid var(--bg);
+  color: var(--sub);
+}
+
+.title-row:last-child { border-bottom: none; }
+
+.title-row--reached { color: var(--ink); }
+
+.title-row__lv { font-weight: 700; }
+
+.title-row__mark {
+  color: var(--accent);
+  font-weight: 700;
+  font-size: 12px;
 }
 
 /* ---- よこむき（タブレット・iPhone を よこにしたとき） ---- */

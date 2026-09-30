@@ -43,7 +43,8 @@ test('まちがいの理由を みじかいことばで返す', () => {
   let s = advance(base, 1); // たてる 2
   const kakeru = J.input(s, 9).result;
   assert.equal(kakeru.kind, 'kakeru');
-  assert.match(kakeru.message, /4 × 2 を もう いちど/);
+  // わる数が1けたなら 積が1けたでも 言いかたは 九九 のまま
+  assert.match(kakeru.message, /4 × 2 だよ。九九を もう いちど となえよう/);
 });
 
 test('2回続けてまちがえると 正解を見せて つぎへ すすむ', () => {

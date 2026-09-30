@@ -7,6 +7,7 @@ import {
 } from '../src/core/stats.js';
 import { makeProblem } from '../src/core/problem.js';
 import * as J from '../src/core/judge.js';
+import { THRESHOLD, titleForLevel } from '../src/core/titles.js';
 
 function play(problem, wrongAt = []) {
   let s = J.createSession(problem);
@@ -58,12 +59,24 @@ test('まちがえた問題は ノーミスに数えず、ステップ別に記�
   assert.equal(st.errors['1'].kakeru, 0);
 });
 
-test('addRound は 回数を数える', () => {
+test('addRound は 回数を数え、XPも積みあげる', () => {
   let st = emptyStats();
-  st = addRound(st, 2, '2026-09-29');
-  st = addRound(st, 2);
+  st = addRound(st, 2, 130, '2026-09-29');
+  st = addRound(st, 2, 90);
   assert.equal(st.levels['2'].rounds, 2);
   assert.equal(st.levels['3'].rounds, 0);
+  assert.equal(st.xp, 220);
+  assert.equal(st.lastPlayedAt, '2026-09-29');
+});
+
+test('summary().title は 累積XPから いまの称号を返す', () => {
+  let st = emptyStats();
+  assert.equal(summary(st).title.level, 1);
+  assert.equal(summary(st).title.title, titleForLevel(1));
+
+  st = addRound(st, 3, THRESHOLD + 10);
+  assert.equal(summary(st).title.level, 2);
+  assert.equal(summary(st).title.title, titleForLevel(2));
 });
 
 test('正答率は マス単位と ノーミス率の2つ', () => {
@@ -102,6 +115,12 @@ test('こわれたデータ・古いデータは 初期値にもどす', () => {
   assert.equal(Object.keys(patched.errors['1']).length, 4, '知らないキーは入れない');
 });
 
+test('XPが こわれていても 0にもどす', () => {
+  assert.equal(normalize({ version: STATS_VERSION, xp: -50 }).xp, 0);
+  assert.equal(normalize({ version: STATS_VERSION, xp: 'たくさん' }).xp, 0);
+  assert.equal(normalize({ version: STATS_VERSION, xp: 123.9 }).xp, 123);
+});
+
 test('weakestKind は いちばん多い まちがい、無ければ null', () => {
   assert.equal(weakestKind({ tateru: 1, kakeru: 5, hiku: 5, orosu: 0 }), 'kakeru');
   assert.equal(weakestKind({ tateru: 0, kakeru: 0, hiku: 0, orosu: 0 }), null);
@@ -122,6 +141,7 @@ test('roundResult は 10問ぶんをまとめる', () => {
   assert.equal(r.perfectRate, 50);
   assert.equal(r.weakest, 'tateru');
   assert.deepEqual(r.errors, { tateru: 2, kakeru: 0, hiku: 0, orosu: 0 });
+  assert.ok(r.xp > 0, '称号システム用のXPも含む');
 });
 
 test('レベルをまたいだ まちがいの合計も出す', () => {

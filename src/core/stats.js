@@ -2,6 +2,7 @@
 
 import { KINDS } from './steps.js';
 import { LEVELS } from './problem.js';
+import { xpForRound, progressForXp } from './titles.js';
 
 export const STATS_VERSION = 1;
 
@@ -18,6 +19,7 @@ export function emptyStats() {
     version: STATS_VERSION,
     levels: Object.fromEntries(LEVELS.map((l) => [String(l), emptyLevel()])),
     errors: Object.fromEntries(LEVELS.map((l) => [String(l), emptyErrors()])),
+    xp: 0,
     lastPlayedAt: null,
   };
 }
@@ -42,6 +44,7 @@ export function normalize(raw) {
       for (const k of KINDS) base.errors[key][k] = toCount(err[k]);
     }
   }
+  base.xp = toCount(raw.xp);
   base.lastPlayedAt = typeof raw.lastPlayedAt === 'string' ? raw.lastPlayedAt : null;
   return base;
 }
@@ -66,10 +69,11 @@ export function addProblem(stats, summary, today = null) {
   return next;
 }
 
-export function addRound(stats, level, today = null) {
+export function addRound(stats, level, xpEarned, today = null) {
   const next = normalize(stats);
   const key = String(level);
   if (next.levels[key]) next.levels[key].rounds += 1;
+  next.xp += toCount(xpEarned);
   if (today) next.lastPlayedAt = today;
   return next;
 }
@@ -104,6 +108,7 @@ export function summary(stats) {
     weakest: weakestKind(totalErrors),
     played: levels.some((l) => l.problems > 0),
     lastPlayedAt: st.lastPlayedAt,
+    title: progressForXp(st.xp),
   };
 }
 
@@ -139,5 +144,6 @@ export function roundResult(level, summaries) {
     perfectRate: rate(perfect, summaries.length),
     errors,
     weakest: weakestKind(errors),
+    xp: xpForRound(summaries),
   };
 }

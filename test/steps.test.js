@@ -85,10 +85,11 @@ test('ステップの順番は 各段で たてる→かける→ひく→おろ
   }
 });
 
-test('2けた以上は かける も ひく も 1の くらいから 入れさせる', () => {
+const columnsOf = (step) => step.cells.map((c) => Number(c.cell.split('#')[1]));
+
+test('レベル3: 2けた以上は かける も ひく も 1の くらいから 入れさせる', () => {
   // 342 ÷ 27 の 2段目: 27 × 2 = 54、72 ー 54 = 18。どちらも 右の けた から
   const drill = buildDrill(makeProblem(342, 27, 3));
-  const columnsOf = (step) => step.cells.map((c) => Number(c.cell.split('#')[1]));
 
   const kakeru = drill.steps.filter((s) => s.kind === 'kakeru');
   assert.deepEqual(kakeru[0].cells.map((c) => c.expect), ['7', '2'], '27 は 7 → 2');
@@ -107,13 +108,45 @@ test('2けた以上は かける も ひく も 1の くらいから 入れさ�
   assert.doesNotMatch(oneDigit.hint, /1の くらいから/);
 });
 
-test('すべてのステップが 1の くらい から 上の くらい へ すすむ', () => {
+test('レベル1・2: わる数が1けたの かける は 九九の こたえを 十の くらいから', () => {
+  // 168 ÷ 7: 7 × 2 = 14 を 1 → 4 の じゅんで 入れる（九九を となえた とおり）
+  const drill = buildDrill(makeProblem(168, 7, 2));
+  const kakeru = drill.steps.filter((s) => s.kind === 'kakeru');
+
+  assert.deepEqual(kakeru[0].cells.map((c) => c.expect), ['1', '4'], '14 は 1 → 4');
+  assert.deepEqual(columnsOf(kakeru[0]), [0, 1], '十の くらい → 1の くらい');
+  assert.match(kakeru[0].hint, /九九の こたえを そのまま かくよ/);
+  assert.doesNotMatch(kakeru[0].hint, /1の くらいから/);
+  assert.match(kakeru[0].ng, /九九を もう いちど となえよう/);
+  assert.doesNotMatch(kakeru[0].ng, /くりあがり/);
+
+  // 積が1けたでも 言いかたは 変えない（28 ÷ 4 の 4 × 7 = 28 ではなく 1けたの例）
+  const one = buildDrill(makeProblem(36, 3, 1)).steps.find((s) => s.kind === 'kakeru');
+  assert.equal(one.cells.length, 1);
+  assert.match(one.hint, /九九の こたえを そのまま かくよ/);
+  assert.match(one.ng, /九九を もう いちど となえよう/);
+});
+
+test('入力の じゅんばんは わる数のけた数と ステップの しゅるいで きまる', () => {
   for (const level of LEVELS) {
     for (const p of allProblems[level]) {
       for (const step of buildDrill(p).steps) {
         const cols = step.cells.map((c) => Number(c.cell.split('#')[1]));
-        const rightToLeft = cols.slice().sort((a, b) => b - a);
-        assert.deepEqual(cols, rightToLeft, `${step.kind} の じゅんばんが ちがう: ${problemKey(p)}`);
+        const fromKuku = step.kind === 'kakeru' && p.divisor < 10;
+        const want = cols.slice().sort((a, b) => (fromKuku ? a - b : b - a));
+        assert.deepEqual(cols, want, `${step.kind} の じゅんばんが ちがう: ${problemKey(p)}`);
+      }
+    }
+  }
+});
+
+test('わる数が1けたなら ひく は かならず 1マス（左からに してはいけない ため）', () => {
+  for (const level of LEVELS) {
+    for (const p of allProblems[level]) {
+      if (p.divisor >= 10) continue;
+      for (const step of buildDrill(p).steps) {
+        if (step.kind !== 'hiku') continue;
+        assert.equal(step.cells.length, 1, `ひく が 2マス: ${problemKey(p)}`);
       }
     }
   }

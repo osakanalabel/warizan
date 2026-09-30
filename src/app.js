@@ -3,10 +3,13 @@
 import { makeRound, LEVELS, LEVEL_LABELS, ROUND_SIZE } from './core/problem.js';
 import * as J from './core/judge.js';
 import { roundResult, addProblem, addRound } from './core/stats.js';
+import { titleChange } from './core/titles.js';
 import { loadStats, saveStats, clearStats, storageWorks } from './storage.js';
 import { buildGrid, updateGrid, fitGrid, revealActive, shakeCell } from './ui/grid.js';
 import { buildKeypad, setKeypadEnabled } from './ui/keypad.js';
-import { showScreen, renderRoundResult, renderRecord, renderHomeBadges } from './ui/screens.js';
+import {
+  showScreen, renderRoundResult, renderRecord, renderHomeBadges, renderHomeTitle,
+} from './ui/screens.js';
 
 const dom = {};
 const state = {
@@ -135,9 +138,12 @@ function goNext() {
 }
 
 function finishRound() {
-  state.stats = addRound(state.stats, state.level, today());
+  const beforeXp = state.stats.xp;
+  const result = roundResult(state.level, state.summaries);
+  state.stats = addRound(state.stats, state.level, result.xp, today());
   saveStats(state.stats);
-  renderRoundResult(dom.resultBody, roundResult(state.level, state.summaries), state.stats);
+  const change = titleChange(beforeXp, state.stats.xp);
+  renderRoundResult(dom.resultBody, result, state.stats, change);
   showScreen('result');
 }
 
@@ -146,6 +152,7 @@ function finishRound() {
 function goHome() {
   state.session = null;
   renderHomeBadges(dom.levelList, state.stats);
+  renderHomeTitle(dom.homeTitle, state.stats);
   showScreen('home');
 }
 
@@ -164,6 +171,7 @@ function resetData() {
   state.stats = clearStats();
   renderRecord(dom.recordBody, state.stats);
   renderHomeBadges(dom.levelList, state.stats);
+  renderHomeTitle(dom.homeTitle, state.stats);
   hideResetConfirm();
 }
 
@@ -204,6 +212,7 @@ function wire() {
 function boot() {
   Object.assign(dom, {
     levelList: pick('level-list'),
+    homeTitle: pick('home-title'),
     grid: pick('grid'),
     stage: pick('stage'),
     message: pick('message'),
@@ -230,6 +239,7 @@ function boot() {
   buildKeypad(dom.keypad, onDigit);
   wire();
   renderHomeBadges(dom.levelList, state.stats);
+  renderHomeTitle(dom.homeTitle, state.stats);
   dom.warning.hidden = storageWorks();
   showScreen('home');
 

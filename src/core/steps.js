@@ -22,10 +22,14 @@ function tensOf(divisor) {
 }
 
 const FROM_ONES = '1の くらいから じゅんばんに';
+const FROM_KUKU = '九九の こたえを そのまま かくよ';
 
 /**
  * 入力する順にならべかえる。
- * 2けた以上は くりあがり・くりさがりが あるので、1の くらい（右）から 入れさせる。
+ * くりあがり・くりさがりが あるので、2けた以上は 1の くらい（右）から 入れさせる。
+ * ただし わる数が1けたのときの かける だけは 例外で、九九の こたえを
+ * となえた とおり 十の くらいから 書かせる（buildDrill の kakeruFromKuku）。
+ * ひく は くりさがり が あるので、この例外に ひろげてはいけない。
  */
 function inputOrder(cellsByColumn) {
   return cellsByColumn.length > 1 ? cellsByColumn.slice().reverse() : cellsByColumn;
@@ -36,7 +40,7 @@ function tateruHint(stage, divisor, isFirst, leadDigit) {
     ? `${leadDigit} は ${divisor} で われないから、${stage.partial} で かんがえるよ。`
     : '';
   if (divisor < 10) {
-    return `${head}${stage.partial} の なかに ${divisor} は いくつ あるかな。${divisor} の だんの くくで さがそう`;
+    return `${head}${stage.partial} の なかに ${divisor} は いくつ あるかな。${divisor} の だんの 九九で さがそう`;
   }
   return `${head}${divisor} を ${tensOf(divisor)}0 と みて、${stage.partial} の なかに いくつ あるか みつもろう`;
 }
@@ -52,6 +56,10 @@ export function buildDrill(problem) {
   const t = trace(dividend, divisor);
   const cols = t.digits.length;
   const leadDigit = t.quotientDigits[0] === null ? t.digits[0] : null;
+  // わる数が1けたなら かける の積は 九九 そのままで、くりあがりが ない。
+  // だから 九九を となえた とおり 十の くらいから 書かせる。
+  // ひく は くりさがり が あるので、この分岐に ひく を まぜてはいけない。
+  const kakeruFromKuku = divisor < 10;
 
   const quotientRow = { id: 'q', kind: 'quotient', cells: {} };
   const dividendRow = { id: 'd', kind: 'dividend', cells: {}, left: String(divisor) };
@@ -117,13 +125,17 @@ export function buildDrill(problem) {
         id: `k${s}`,
         kind: 'kakeru',
         stage: s,
-        cells: inputOrder(pCells),
-        hint: kakeruMulti
-          ? `${divisor} × ${stage.q} を けいさんして、${stage.partial} の したに かくよ。${FROM_ONES}`
-          : `${divisor} × ${stage.q} を けいさんして、${stage.partial} の したに かくよ`,
-        ng: kakeruMulti
-          ? `${divisor} × ${stage.q} だよ。くりあがりに きを つけよう`
-          : `${divisor} × ${stage.q} を もう いちど けいさんしよう`,
+        cells: kakeruFromKuku ? pCells : inputOrder(pCells),
+        hint: kakeruFromKuku
+          ? FROM_KUKU
+          : (kakeruMulti
+            ? `${divisor} × ${stage.q} を けいさんして、${stage.partial} の したに かくよ。${FROM_ONES}`
+            : `${divisor} × ${stage.q} を けいさんして、${stage.partial} の したに かくよ`),
+        ng: kakeruFromKuku
+          ? `${divisor} × ${stage.q} だよ。九九を もう いちど となえよう`
+          : (kakeruMulti
+            ? `${divisor} × ${stage.q} だよ。くりあがりに きを つけよう`
+            : `${divisor} × ${stage.q} を もう いちど けいさんしよう`),
         info,
       });
 
