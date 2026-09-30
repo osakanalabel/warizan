@@ -92,10 +92,10 @@ test('レベル3: 2けた以上は かける も ひく も 1の くらいから
   const drill = buildDrill(makeProblem(342, 27, 3));
 
   const kakeru = drill.steps.filter((s) => s.kind === 'kakeru');
-  assert.deepEqual(kakeru[0].cells.map((c) => c.expect), ['7', '2'], '27 は 7 → 2');
-  assert.deepEqual(columnsOf(kakeru[0]), [1, 0]);
-  assert.match(kakeru[0].hint, /1の くらいから/);
-  assert.match(kakeru[0].ng, /くりあがり/);
+  assert.deepEqual(kakeru[1].cells.map((c) => c.expect), ['4', '5'], '54 は 4 → 5');
+  assert.deepEqual(columnsOf(kakeru[1]), [2, 1]);
+  assert.match(kakeru[1].hint, /1の くらいから/);
+  assert.match(kakeru[1].ng, /くりあがり/);
 
   const twoDigits = drill.steps.find((s) => s.kind === 'hiku' && s.cells.length === 2);
   assert.deepEqual(twoDigits.cells.map((c) => c.expect), ['8', '1'], '18 は 8 → 1');
@@ -127,17 +127,31 @@ test('レベル1・2: わる数が1けたの かける は 九九の こたえ�
   assert.match(one.ng, /九九を もう いちど となえよう/);
 });
 
-test('入力の じゅんばんは わる数のけた数と ステップの しゅるいで きまる', () => {
+test('入力の じゅんばんは わる数のけた数と しょうで きまる', () => {
   for (const level of LEVELS) {
     for (const p of allProblems[level]) {
       for (const step of buildDrill(p).steps) {
         const cols = step.cells.map((c) => Number(c.cell.split('#')[1]));
-        const fromKuku = step.kind === 'kakeru' && p.divisor < 10;
-        const want = cols.slice().sort((a, b) => (fromKuku ? a - b : b - a));
+        // けいさんが いらない かける（九九そのまま / わる数を うつすだけ）は 左から
+        const fromLeft = step.kind === 'kakeru' && (p.divisor < 10 || step.info.q === 1);
+        const want = cols.slice().sort((a, b) => (fromLeft ? a - b : b - a));
         assert.deepEqual(cols, want, `${step.kind} の じゅんばんが ちがう: ${problemKey(p)}`);
       }
     }
   }
+});
+
+test('レベル3: しょうが 1 の かける は わる数を 十の くらいから うつす', () => {
+  // 342 ÷ 27 の 1段目: 27 × 1 = 27 を 2 → 7 の じゅんで 入れる
+  const drill = buildDrill(makeProblem(342, 27, 3));
+  const one = drill.steps.filter((s) => s.kind === 'kakeru')[0];
+
+  assert.equal(one.info.q, 1);
+  assert.deepEqual(one.cells.map((c) => c.expect), ['2', '7'], '27 は 2 → 7');
+  assert.deepEqual(columnsOf(one), [0, 1], '十の くらい → 1の くらい');
+  assert.equal(one.hint, '27 × 1 を 34 の したに かくよ');
+  assert.equal(one.ng, '27 × 1 を もう いちど けいさんしよう');
+  assert.doesNotMatch(one.ng, /くりあがり/);
 });
 
 test('わる数が1けたなら ひく は かならず 1マス（左からに してはいけない ため）', () => {

@@ -172,7 +172,8 @@ test('光らせるマスは いまのステップのマスだけ', () => {
   assert.deepEqual(J.stepCells(s), step.cells.map((c) => c.cell));
   assert.equal(J.stepCells(s).length, 2);
   assert.equal(J.activeCell(s), step.cells[0].cell);
-  assert.equal(J.activeCell(s), 'p0#1', '1の くらいの マスから 入れる');
+  // 34 ÷ 27 は 商が 1。わる数を うつすだけなので 十の くらいから
+  assert.equal(J.activeCell(s), 'p0#0', 'しょうが 1 なら 十の くらいから');
 });
 
 test('ひきざんは 1の くらいの マスが さきに 光る', () => {

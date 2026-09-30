@@ -120,20 +120,26 @@ export function buildDrill(problem) {
         return { cell: id, expect: ch };
       });
       rows.push(pRow);
+      // 商が1なら 積は わる数 そのもの。うつすだけなので くりあがりが なく、
+      // 九九のときと おなじく 十の くらいから 書かせる。
+      const copyDivisor = stage.q === 1;
+      const fromLeft = kakeruFromKuku || copyDivisor;
       const kakeruMulti = pCells.length > 1;
       steps.push({
         id: `k${s}`,
         kind: 'kakeru',
         stage: s,
-        cells: kakeruFromKuku ? pCells : inputOrder(pCells),
+        cells: fromLeft ? pCells : inputOrder(pCells),
         hint: kakeruFromKuku
           ? FROM_KUKU
-          : (kakeruMulti
-            ? `${divisor} × ${stage.q} を けいさんして、${stage.partial} の したに かくよ。${FROM_ONES}`
-            : `${divisor} × ${stage.q} を けいさんして、${stage.partial} の したに かくよ`),
+          : (copyDivisor
+            ? `${divisor} × ${stage.q} を ${stage.partial} の したに かくよ`
+            : (kakeruMulti
+              ? `${divisor} × ${stage.q} を けいさんして、${stage.partial} の したに かくよ。${FROM_ONES}`
+              : `${divisor} × ${stage.q} を けいさんして、${stage.partial} の したに かくよ`)),
         ng: kakeruFromKuku
           ? `${divisor} × ${stage.q} だよ。九九を もう いちど となえよう`
-          : (kakeruMulti
+          : (kakeruMulti && !copyDivisor
             ? `${divisor} × ${stage.q} だよ。くりあがりに きを つけよう`
             : `${divisor} × ${stage.q} を もう いちど けいさんしよう`),
         info,
